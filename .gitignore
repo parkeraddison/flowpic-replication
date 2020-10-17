@@ -1,7 +1,7 @@
 ### Additional ignore patterns
 
 # Keep raw data out of versioning
-data/
+./data/
 # Secrets
 .env
 
