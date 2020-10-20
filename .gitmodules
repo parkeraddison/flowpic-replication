@@ -1,0 +1,3 @@
+[submodule "network-stats"]
+	path = network-stats
+	url = https://github.com/Viasat/network-stats.git
