@@ -12,4 +12,8 @@ To stop data capturing, `CTRL-C` in your command prompt.
 
 Data exploration notebooks are located under `notebooks/`
 
+### Responsibilities
+
+* Group member 1 (Jerry) contributed to setting up the data generation environment through network-stats and configuring data-generation-params.
+* Group member 2 (Parker) 
 
