@@ -1,0 +1,14 @@
+{
+    "username": "jeq004",
+    "provider":"youtube",
+    "quality":"1080p",
+    "speed":"1x",
+    "vpn": "novpn",
+    "platform":"mac",
+    "clean":"clean",
+    "date":"20201029",
+    "interface": "en0",
+    "csvmode":"-e",
+    "path": "network-stats-local/network_stats.py"
+
+}
