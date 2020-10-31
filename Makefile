@@ -5,7 +5,7 @@ interface ?= enp2s0	# See list_interface.py
 csvmode ?= e 		# {'c' for normal csv | 'e' for extended} 
 # Internal
 _pythonpath = /home/parker/miniconda3/envs/via/bin/python
-_datapath = ./data/collected/
+_datapath = ./data/
 # Functional
 date = $(shell date +'%Y%m%d')
 
@@ -22,18 +22,28 @@ collect-data:
 	# Requires:
 	# - provider
 	# - speed
+	# - quality
 	# - vpn/novpn
 	# - clean/noisy
+	# Optional:
+	# - extension (like 'a' 'b' 'c')
 	$(_pythonpath) \
 	network-stats/network_stats.py \
 	-i $(interface) \
-	-$(csvmode) $(_datapath)$(username)-$(provider)-$(speed)-$(vpn)-$(platform)-$(clean)-$(date).csv
+	-$(csvmode) $(_datapath)collected/$(username)-$(provider)-$(speed)-$(quality)-$(vpn)-$(platform)-$(clean)-$(date)$(extension).csv
 
-# Takes all .csv files in the data directory and individually compresses each
-# file to a .csv.zip, then moves the files to the zipped data sub-directory.
+# Uses shell commands $${...} to get the filename without path... not sure how
+# good that is for portability.
 zip-data:
-	for i in $(_datapath)*.csv; do zip "$${i%/}.zip" "$$i"; done
-	mv $(_datapath)*.zip $(_datapath)zipped
+	for i in $(_datapath)collected/*.csv ; do \
+		zip "$(_datapath)zipped/$${i##*/}.zip" "$$i" ; \
+		# mv "$$i" $(_datapath)unzipped/ ; \
+	done
+
+echo-names:
+	for i in $(_datapath)collected/*.csv ; do \
+		echo $${i##*/} ; \
+	done
 
 # Runs data collection and compression. See `collect-data` and `zip-data`.
-data: collect-data zip-data
+# data: collect-data zip-data

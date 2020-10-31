@@ -14,6 +14,6 @@ Data exploration notebooks are located under `notebooks/`
 
 ### Responsibilities
 
-* Group member 1 (Jerry) contributed to setting up the data generation environment through network-stats and configuring data-generation-params.
-* Group member 2 (Parker) 
+* Group member 1 (Jerry) Initial work on introduction. Wrote run.py, set up data generation environment through network-stats and configured data-generation-params to be used with run.py
+* Group member 2 (Parker) Initial work on data generation environment. Wrote introduction.
 
