@@ -37,7 +37,7 @@ collect-data:
 zip-data:
 	for i in $(_datapath)collected/*.csv ; do \
 		zip "$(_datapath)zipped/$${i##*/}.zip" "$$i" ; \
-		# mv "$$i" $(_datapath)unzipped/ ; \
+		mv "$$i" $(_datapath)unzipped/ ; \
 	done
 
 echo-names:
@@ -47,3 +47,7 @@ echo-names:
 
 # Runs data collection and compression. See `collect-data` and `zip-data`.
 # data: collect-data zip-data
+
+
+container:
+	

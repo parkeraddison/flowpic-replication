@@ -34,10 +34,6 @@ RUN cd pcapy*/ && \
 
 WORKDIR /home
 
-RUN mkdir network-stats
-
-#COPY * network-stats/
 RUN git clone "https://github.com/viasat/network-stats.git"
 
 CMD ["bash"]
-
