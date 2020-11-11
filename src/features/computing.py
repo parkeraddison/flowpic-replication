@@ -1,4 +1,4 @@
-def rolling(df, column, seconds, stats=['mean']):
+def roll(df, column, seconds, stats=['mean']):
     """
     Parameters
     ----------

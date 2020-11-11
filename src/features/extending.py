@@ -4,7 +4,7 @@ def extend(df, *funcs):
     We can extend our preprocessed data to create new columns that statistics
     can be computed on.
 
-    Filtering or conditioning on existing features of df should be done before
+    Conditioning on existing features of df should be done before
     extending.
 
     Examples

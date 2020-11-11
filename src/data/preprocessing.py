@@ -1,3 +1,5 @@
+import pandas as pd
+
 UNIT = 'ms' # Network-stats records packet timing in milliseconds.
 
 def packet_flows(df):
