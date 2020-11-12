@@ -1,4 +1,5 @@
 ### Additional ignore patterns
+jeq004*.csv
 
 # Keep raw data out of versioning
 /data/

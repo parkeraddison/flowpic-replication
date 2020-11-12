@@ -1,0 +1,6 @@
+{
+    "filepath": "data/unzipped/",
+    "filter_direction": "upload",
+    "rolling_column": "psize",
+    "rolling_window": 10
+}
