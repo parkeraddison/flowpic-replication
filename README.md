@@ -71,6 +71,6 @@ cat data/features/features.csv
 
 ## Responsibilities
 
-* Group member 1 (Jerry) Initial work on introduction. Wrote run.py, set up data generation environment through network-stats and configured data-generation-params to be used with run.py
-* Group member 2 (Parker) Initial work on data generation environment. Wrote introduction.
+* Group member 1 (Jerry) Initial work on introduction. Wrote run.py, set up data generation environment through network-stats and configured data-generation-params to be used with run.py. Work on methods report.
+* Group member 2 (Parker) Initial work on data generation environment. Wrote introduction. Edit methods report. Create preprocessing and feature piplines, targets.
 

@@ -1,7 +1,7 @@
 {
-    "config": ["config/data-params.json", "config/features-params.json"],  # paths of at least 2 config files
-    "build": "run.py", # path of your build script
-    "library": ["src"], # directory containing (your) library code
-    "notebook": ["notebooks/3_cleaning-and-features.ipynb"], # path to at least one notebook meant for reading by someone other than you.
-    "targets": ["data", "features"] # at least two targets
+    "config": ["config/data-params.json", "config/features-params.json"],
+    "build": "run.py",
+    "library": ["src"],
+    "notebook": ["notebooks/3_cleaning-and-features.ipynb"],
+    "targets": ["data", "features"]
 }
