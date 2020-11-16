@@ -1,0 +1,8 @@
+{
+    "source": "data/raw",
+    "outdir": "data/preprocessed",
+    "pattern": null,
+    "add_columns": [
+        "inter_arrival_time"
+    ]
+}

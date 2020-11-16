@@ -1,0 +1,6 @@
+{
+    "source": "data/preprocessed",
+    "outdir": "data/features",
+    "outfile": "features.csv",
+    "chunk_length": 60
+}

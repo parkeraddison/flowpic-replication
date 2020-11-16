@@ -23,3 +23,21 @@ def roll(df, column, seconds, stats=['mean']):
         .agg(stats)
         .where(df.index >= window_width)
     )
+
+def mean_packet_size(df):
+    return df.psize.mean()
+
+def mean_inter_packet_delay(df):
+    return df.msdelta.mean()
+
+def send_receive_ratio(df):
+    send = df[df.pdir == 1]
+    receive = df[df.pdir == 2]
+    # There are some files that don't follow the naming convention and cause
+    # novpn data to get through our ETL pipeline. These mess with our cleaning
+    # script and cause errors.
+    #! TODO: Need to make more robust name parsing -- or fix naming errors.
+    try:
+        return send.shape[0] / receive.shape[0]
+    except ZeroDivisionError:
+        return -1
