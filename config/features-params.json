@@ -1,6 +1,6 @@
 {
     "source": "data/preprocessed",
     "outdir": "data/features",
-    "outfile": "features.csv",
+    "outfile": "features_peaks.csv",
     "chunk_length": 60
 }

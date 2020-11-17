@@ -1,5 +1,5 @@
 {
-    "source": "data/features/features.csv",
+    "source": "data/features/features_peaks.csv",
     "classifier": "RandomForest",
     "parameters": {
         "RandomForest": {
