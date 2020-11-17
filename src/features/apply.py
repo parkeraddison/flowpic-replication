@@ -13,6 +13,7 @@ def apply_features(source, outdir, outfile, chunk_length):
     total_files = len(preprocessed)
 
     frame = pd.DataFrame(columns=[
+        'file',
         'activity',
         'mean_packet_size',
         'mean_inter_packet_delay',
@@ -24,8 +25,11 @@ def apply_features(source, outdir, outfile, chunk_length):
         print(f"Feature engineering {file}")
 
         # All preprocessed files follow the same naming convention -- either
-        # streaming-000n.csv or browsing-000n.csv.
-        activity = os.path.basename(file).split('-')[0]
+        # streaming-<originalfilename>.csv or browsing-<original>.csv
+        fname = os.path.basename(file)
+        splitted = fname.split('-')
+        activity = splitted[0]
+        originalfilename = '-'.join(splitted[1:])
 
         df = pd.read_csv(file)
 
@@ -34,6 +38,7 @@ def apply_features(source, outdir, outfile, chunk_length):
         send_receive_ratio = src.features.computing.send_receive_ratio(df)
 
         row = pd.Series({
+            'file': originalfilename,
             'activity': activity,
             'mean_packet_size': mean_packet_size,
             'mean_inter_packet_delay': mean_inter_packet_delay,

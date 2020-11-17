@@ -5,8 +5,16 @@
   - [Target `collect`](#target-collect)
   - [Target `data`](#target-data)
   - [Target `features`](#target-features)
+  - [Target `train`](#target-train)
   - [Example](#example)
 - [Responsibilities](#responsibilities)
+
+## TODO
+
+- [ ] Better features
+  - [ ] Signal processing would be great, but quickly maybe just more summary stats
+- [ ] Chunk the feature data into bins/windows
+- [ ] Address class imbalance (collect more browsing data!)
 
 ## Purpose
 
@@ -53,6 +61,17 @@ See `config/features-params.json` for configuration:
 | outfile | File name to store feature engineered data. Must be a csv. Default: `features.csv` |
 | chunk_length | Time in seconds to chunk data into when computing features. Default: `60` |
 
+### Target `train`
+
+Trains a model on feature-engineered data and prints out its area under the ROC curve.
+
+See `config/train-params.json` for configuration:
+| Key | Description |
+| --- | --- |
+| source | File path to csv containing feature engineered data. Default: `data/features/features.csv` |
+| classifier | Name of the type of classifier to use. One of {RandomForest}. Default: `RandomForest` |
+| parameters | Classifier-specific hyperparameters. See sklearn documentation.
+
 ### Example
 
 ```bash
@@ -62,11 +81,19 @@ launch-180.sh -i parkeraddison/capstone-dev -P Always -G B05_VPN_XRAY
 
 cd /home/jovyan/data-science-capstone
 
-python run.py data
-
-python run.py features
-
-cat data/features/features.csv
+# Will take a few minutes to preprocess the data -- haven't parallelized yet!
+python run.py data features train
+```
+Output:
+```plaintext
+[...]
+Writing features to data/features/features.csv
+Feature engineering complete.
+Train target recognized.
+Train configuration loaded.
+Training model.
+ROC AUC: 0.8333333333333334
+Model training complete.
 ```
 
 ## Responsibilities

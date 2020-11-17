@@ -5,6 +5,8 @@ import glob
 import os
 import re
 
+import multiprocessing
+
 def etl(source, outdir, pattern, add_columns):
     """
     Loads data files from source matching a glob pattern, then performs cleaning
@@ -13,7 +15,7 @@ def etl(source, outdir, pattern, add_columns):
 
     # Make sure source exists. If not, then make soft links.
     if not os.path.exists(source):
-        DATA_DIRECTORY = "/teams/DSC180A_FA20_A00/b05vpnxray/personal_pgaddiso-jeq004/data/"
+        DATA_DIRECTORY = "/teams/DSC180A_FA20_A00/b05vpnxray/data/unzipped"
         print(f"Symlinking raw data from {DATA_DIRECTORY} into {source}")
         os.symlink(DATA_DIRECTORY, source)
 
@@ -29,13 +31,18 @@ def etl(source, outdir, pattern, add_columns):
     # If a glob pattern is specified, only perform preprocessing on those files.
     # Otherwise, a null or empty pattern will default to preprocessing all.
     to_preprocess = glob.glob(os.path.join(source, pattern or "*"))
-    # We're not interested in the novpn data
-    to_preprocess = filter(lambda file: "novpn" not in file, to_preprocess)
+    # We're only interested in the vpn data
+    to_preprocess = filter(lambda file: "novpn" not in file.lower(), to_preprocess)
 
-    streaming_count = 0
-    browsing_count = 0
+    #! TODO: Parallelize
+    #
+    #  I attempted to do so, but ran into a NameError about half way through
+    #  the data! (strange).
     for file in to_preprocess:
+
         print(f"Processing {file}")
+        fname = os.path.basename(file)
+        fnlower = fname.lower()
 
         # Load in the raw data
         df = pd.read_csv(file)
@@ -44,6 +51,7 @@ def etl(source, outdir, pattern, add_columns):
         # config-agnostic.
         cleaned = src.data.clean(df)
         preprocessed = src.data.preprocess(cleaned)
+        df = preprocessed
 
         # Calculate additional columns for features to be engineered on.
         # Currently only inter arrival time is possible.
@@ -54,6 +62,7 @@ def etl(source, outdir, pattern, add_columns):
         # the preprocessing step is questionable. I haven't even decided myself!
         extensions = [column_map[column] for column in add_columns]
         extended = src.features.extend(preprocessed, *extensions)
+        df = extended
 
         # Extract labels from the file name and save as either a streaming or
         # browsing file.
@@ -67,18 +76,24 @@ def etl(source, outdir, pattern, add_columns):
         browsing_words = [
             "novideo", "nostream", "general", "browsing", 
         ]
-        is_streaming = re.search('|'.join(streaming_providers), file)
-        is_browsing = re.search('|'.join(browsing_words), file)
+        is_streaming = re.search('|'.join(streaming_providers), fnlower)
+        is_browsing = re.search('|'.join(browsing_words), fnlower)
         if not (is_streaming or is_browsing) or (is_streaming and is_browsing):
-            print(f"File {file} does not match naming conventions, cannot determine activity. Ignoring")
-            continue
+            print(f"File {fname} does not match naming conventions, cannot determine activity. Ignoring")
+            return
         # meta = {
         #     'activity': 'streaming' if is_streaming else 'browsing',
         # }
 
+        # Save preprocessed file with new format:
+        # {streaming | browswing }-<original file name>.csv
+        #
+        # Notice we don't have index=False -- it's important to keep the index
+        # since it is set to the packet arrival time.
         if is_streaming:
-            extended.to_csv(os.path.join(outdir, f"streaming-{streaming_count:04d}.csv"), index=False)
-            streaming_count += 1
+            df.to_csv(os.path.join(outdir, f"streaming-{fname}"))
         else:
-            extended.to_csv(os.path.join(outdir, f"browsing-{browsing_count:04d}.csv"), index=False)
-            browsing_count += 1
+            df.to_csv(os.path.join(outdir, f"browsing-{fname}"))
+    # pool = multiprocessing.Pool(4)
+    # pool.map(process_file, to_preprocess)
+    

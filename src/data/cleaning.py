@@ -8,12 +8,20 @@
 # Furthermore, IPs that start with 224.x-239.x are 'multicast' IPs, and those
 # starting with 255.x are 'broadcast' IPs. We can ignore these when trying to
 # find what the client machine IP is.
+#
+# Finally (for now at least), we must also handle a special IPv6 feature: hop-
+# by-hop protocols. These are protocol 0, show up a *ton* with IPv6, and make
+# things confusing. Can also filter these out.
+
+#> This process isn't robust. We will perform these filtering steps with the
+#  exception of attempting to determine solely the client and vpn addresses.
 
 # Why does this need to be a tuple? Because str.startswith will complain if you
 # give it a list!
 internal_ranges = ('10.0.', '0.0.', '172.16.', '192.168.', '169.254.')
 multicast_ranges = tuple(str(i)+'.' for i in range(224,239+1))
 broadcast_ranges = ('255.',)
+hopbyhop_protocol = 0
 
 
 internal_comm = lambda df: (
@@ -25,6 +33,9 @@ multicast_comm = lambda df: (
 )
 broadcast_comm = lambda df: (
     (df.IP2.str.startswith(broadcast_ranges))
+)
+hopbyhop_comm = lambda df: (
+    df.Proto == hopbyhop_protocol
 )
 
 def get_client_ip(df):
@@ -40,6 +51,7 @@ def get_client_ip(df):
         ~internal_comm(df)
         & ~multicast_comm(df)
         & ~broadcast_comm(df)
+        & ~hopbyhop_comm(df)
     ].IP1.value_counts().index[0]
 
 client_comm = lambda df: (
@@ -63,6 +75,16 @@ vpn_comm = lambda df: (
 
 def clean(df):
     """
-    Isolates the traffic flow between the client and VPN service.
+    ~~Isolates the traffic flow between the client and VPN service.~~
+
+    Removes internal communications such as: local-to-local, multicast, broad-
+    cast, and hop-by-hop.
     """
-    return df[vpn_comm(df)]
+    # return df[vpn_comm(df)]
+    return df[
+        ~internal_comm(df)
+        & ~multicast_comm(df)
+        & ~broadcast_comm(df)
+        & ~hopbyhop_comm(df)
+    ]
+

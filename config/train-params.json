@@ -1,0 +1,10 @@
+{
+    "source": "data/features/features.csv",
+    "classifier": "RandomForest",
+    "parameters": {
+        "RandomForest": {
+            "n_estimators": 50,
+            "max_depth": 100
+        }
+    }
+}
