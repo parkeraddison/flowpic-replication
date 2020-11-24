@@ -2,5 +2,7 @@
     "source": "data/preprocessed",
     "outdir": "data/features",
     "outfile": "features_signals.csv",
-    "chunk_length": 60
+    "chunk_length": "60s",
+    "resample_length":  "100ms",
+    "rolling_length": "1s"
 }

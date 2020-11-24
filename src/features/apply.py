@@ -9,7 +9,13 @@ import numpy as np
 
 import concurrent.futures
 
-def get_signal(file, resample_length='100ms', chunk_length='90s', rolling_length='1s'):
+def _get_signal(args):
+    """
+    A helper to be called with the ProcessorPool -- takes all arguments as a
+    single input, a tuple of arguments.
+    """
+    return get_signal(file=args[0], chunk_length=args[1], resample_length=args[2], rolling_length=args[3])
+def get_signal(file, chunk_length='90s', resample_length='100ms', rolling_length='1s'):
 
     print(f"Feature engineering {file}")
 
@@ -35,27 +41,31 @@ def get_signal(file, resample_length='100ms', chunk_length='90s', rolling_length
     signals = []
 
     for chunk in chunks:
-        signal = tuple(chunk.rolling(rolling_length, on='ptime').psize.sum().values)
-        signals.append((originalfilename, activity, signal))
+        signal = chunk.rolling(rolling_length, on='ptime').psize.sum().values
+        # Also normalize to (0-1)
+        #
+        # Note: This removes information that could be used in quality detection
+        signal = (signal - signal.min())
+        signal = signal / signal.max()
+        signals.append((originalfilename, activity, tuple(signal)))
 
     return signals or [None, None, None]
 
 
-def apply_features(source, outdir, outfile, chunk_length):
+def apply_features(source, outdir, outfile, chunk_length, resample_length, rolling_length):
 
     #! NOTE: There is some sloppy/temporary code in here :) Need to re-examine
     #  how to support adding more features in general, e.g. through config.
     #
     #  Will do later.
 
-    print("Chunk length not yet supported!")
-
     preprocessed = glob.glob(os.path.join(source, "*"))
+    args = zip(preprocessed, [chunk_length]*len(preprocessed), [resample_length]*len(preprocessed), [rolling_length]*len(preprocessed))
 
     with concurrent.futures.ProcessPoolExecutor(5) as executor:
-        signals = executor.map(get_signal, preprocessed)
+        signals = executor.map(_get_signal, args)
     
-    frame = pd.DataFrame(np.vstack(signals)).dropna()
+    frame = pd.DataFrame(np.vstack(list(signals))).dropna()
     frame.columns = ['file', 'activity', 'signal']
 
 

@@ -1,6 +1,6 @@
 {
-    "source": "data/features/features_peaks.csv",
-    "classifier": "RandomForest",
+    "source": "data/features/features_signals.csv",
+    "classifier": "LSTM",
     "parameters": {
         "RandomForest": {
             "n_estimators": 50,
