@@ -1,6 +1,6 @@
 # For code development
 
-FROM jupyter/scipy-notebook:latest
+FROM jupyter/tensorflow-notebook:latest
 
 USER root
 
@@ -29,7 +29,7 @@ RUN wget "https://github.com/SecureAuthCorp/impacket/releases/download/impacket_
 RUN cd impacket*/ && \
     pip3 install .
 
-### Development requirements
+### Additional development requirements
 #
 # (none yet that aren't already covered in base image)
 # RUN ...
