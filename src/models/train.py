@@ -1,5 +1,7 @@
 import src
 
+import os
+
 import pandas as pd
 import numpy as np
 
@@ -12,7 +14,9 @@ from tensorflow import keras
 
 import ast
 
-def train(source, classifier, parameters):
+def train(source, outdir, outfile, classifier, parameters):
+
+    os.makedirs(outdir, exist_ok=True)
 
     data = pd.read_csv(source)
 
@@ -32,17 +36,19 @@ def train(source, classifier, parameters):
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     model.fit(X_train, y_train, epochs=5)
 
-    # Evaluate on test (validation) data
-    preds = (model.predict(X_test) > 0.5).astype('int32')
+    model.save(os.path.join(outdir, outfile))
 
-    from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, confusion_matrix
-    print('Accuracy:', accuracy_score(preds, y_test))
-    print('F1:      ', f1_score(preds, y_test))
-    print('ROC AUC: ', roc_auc_score(preds, y_test))
-    print('')
-    print('Predicted Browsing / Streaming ->')
-    print('True Browsing / Streaming v')
-    print(confusion_matrix(y_test, preds))
+    # Evaluate on test (validation) data
+    # preds = (model.predict(X_test) > 0.5).astype('int32')
+
+    # from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, confusion_matrix
+    # print('Accuracy:', accuracy_score(preds, y_test))
+    # print('F1:      ', f1_score(preds, y_test))
+    # print('ROC AUC: ', roc_auc_score(preds, y_test))
+    # print('')
+    # print('Predicted Browsing / Streaming ->')
+    # print('True Browsing / Streaming v')
+    # print(confusion_matrix(y_test, preds))
 
 # def train(source, classifier, parameters):
 

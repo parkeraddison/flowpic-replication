@@ -1,7 +1,0 @@
-{
-    "config": ["config/data-params.json", "config/features-params.json"],
-    "build": "run.py",
-    "library": ["src"],
-    "notebook": ["notebooks/3_cleaning-and-features.ipynb"],
-    "targets": ["data", "features"]
-}

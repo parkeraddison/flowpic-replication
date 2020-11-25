@@ -1,8 +1,5 @@
 {
     "source": "data/raw",
     "outdir": "data/preprocessed",
-    "pattern": "*",
-    "add_columns": [
-        "inter_arrival_time"
-    ]
+    "pattern": "pgad*"
 }

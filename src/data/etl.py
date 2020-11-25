@@ -7,12 +7,15 @@ import re
 
 # import multiprocessing
 import concurrent.futures
+# from src.utils.decorators import argument_tuple
 
-global out
+# global out
 
-def process_file(file):
-    global out
-    outdir = out
+def _process_file(args):
+    return process_file(*args)
+def process_file(file, outdir):
+    # global out
+    # outdir = out
 
     print(f"Processing {file}")
     fname = os.path.basename(file)
@@ -26,17 +29,6 @@ def process_file(file):
     cleaned = src.data.clean(df)
     preprocessed = src.data.preprocess(cleaned)
     df = preprocessed
-
-    # # Calculate additional columns for features to be engineered on.
-    # # Currently only inter arrival time is possible.
-    # column_map = {
-    #     "inter_arrival_time": src.features.extending.inter_arrival_time
-    # }
-    # # Yeah yeah, this is related to features... whether or not it belongs in
-    # # the preprocessing step is questionable. I haven't even decided myself!
-    # extensions = [column_map[column] for column in add_columns]
-    # extended = src.features.extend(preprocessed, *extensions)
-    # df = extended
 
     # Extract labels from the file name and save as either a streaming or
     # browsing file.
@@ -53,11 +45,8 @@ def process_file(file):
     is_streaming = re.search('|'.join(streaming_providers), fnlower)
     is_browsing = re.search('|'.join(browsing_words), fnlower)
     if not (is_streaming or is_browsing) or (is_streaming and is_browsing):
-        # print(f"File {fname} does not match naming conventions, cannot determine activity. Ignoring")
+        print(f"File {fname} does not match naming conventions, cannot determine activity. Ignoring")
         return False
-    # meta = {
-    #     'activity': 'streaming' if is_streaming else 'browsing',
-    # }
 
     # Save preprocessed file with new format:
     # {streaming | browswing }-<original file name>.csv
@@ -71,13 +60,13 @@ def process_file(file):
 
     return True
 
-def etl(source, outdir, pattern, add_columns):
+def etl(source, outdir, pattern):
     """
     Loads data files from source matching a glob pattern, then performs cleaning
     and preprocessing steps and saves each file to outdir.
     """
-    global out
-    out = outdir
+    # global out
+    # out = outdir
 
     # Make sure source exists. If not, then make soft links.
     if not os.path.exists(source):
@@ -100,27 +89,9 @@ def etl(source, outdir, pattern, add_columns):
     # We're only interested in the vpn data
     to_preprocess = list(filter(lambda file: "novpn" not in file.lower(), to_preprocess))
 
-    #! TODO: Parallelize
-    #
-    #  I attempted to do so, but ran into a NameError about half way through
-    #  the data! (strange).
-    
-
-    # values = [1,2,3,4]
-    
-    # with concurrent.futures.ProcessPoolExecutor(4) as executor:
-    #     results = executor.map(square, values)
-    #     print(list(results))
-
+    args = zip(to_preprocess, [outdir]*len(to_preprocess))
     with concurrent.futures.ProcessPoolExecutor(5) as executor:
-        results = executor.map(process_file, to_preprocess)
+        results = executor.map(_process_file, args)
     
         print(list(results))
-        # for result in results:
-        #     print(result)
-
-    # return True
-    
-    # pool = multiprocessing.Pool(4)
-    # pool.map(process_file, to_preprocess)
     

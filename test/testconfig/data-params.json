@@ -1,0 +1,5 @@
+{
+    "source": "test/testdata",
+    "outdir": "data/preprocessed",
+    "pattern": "*"
+}

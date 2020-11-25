@@ -1,0 +1,8 @@
+{
+    "source": "data/preprocessed",
+    "outdir": "data/features",
+    "outfile": "features.csv",
+    "chunk_length": "2s",
+    "resample_length":  "100ms",
+    "rolling_length": "1s"
+}

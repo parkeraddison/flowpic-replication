@@ -2,6 +2,7 @@ import src.data
 import src.features
 import src.models
 import src.charts
+import src.utils
 
 def pipeline(df, stop_after='filter', filters=[]):
     """
