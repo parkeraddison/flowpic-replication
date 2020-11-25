@@ -1,5 +1,8 @@
 {
     "source": "data/raw",
     "outdir": "data/preprocessed",
-    "pattern": "pgad*"
+    "pattern": "*",
+    "chunk_length": "60s",
+    "split_ips": false,
+    "dominating_threshold": 0.9
 }

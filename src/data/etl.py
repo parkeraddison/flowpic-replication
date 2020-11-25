@@ -1,21 +1,16 @@
 import src.data
 
 import pandas as pd
+import numpy as np
 import glob
 import os
 import re
 
-# import multiprocessing
-import concurrent.futures
-# from src.utils.decorators import argument_tuple
-
-# global out
+import multiprocessing
 
 def _process_file(args):
     return process_file(*args)
-def process_file(file, outdir):
-    # global out
-    # outdir = out
+def process_file(file, outdir, chunk_length, split_ips, dominating_threshold):
 
     print(f"Processing {file}")
     fname = os.path.basename(file)
@@ -26,10 +21,11 @@ def process_file(file, outdir):
 
     # Cleaning and preprocessing (reformatting) of the data are file- and
     # config-agnostic.
-    cleaned = src.data.clean(df)
-    preprocessed = src.data.preprocess(cleaned)
-    df = preprocessed
-
+    try:
+        cleaned = src.data.clean(df)
+        chunks = src.data.preprocess(cleaned, chunk_length, split_ips, dominating_threshold)
+    except Warning as warn:
+        print(warn)
     # Extract labels from the file name and save as either a streaming or
     # browsing file.
     #
@@ -49,24 +45,23 @@ def process_file(file, outdir):
         return False
 
     # Save preprocessed file with new format:
-    # {streaming | browswing }-<original file name>.csv
+    # {streaming | browswing }-<chunk number>-<original file name>.csv
     #
     # Notice we don't have index=False -- it's important to keep the index
     # since it is set to the packet arrival time.
-    if is_streaming:
-        df.to_csv(os.path.join(outdir, f"streaming-{fname}"))
-    else:
-        df.to_csv(os.path.join(outdir, f"browsing-{fname}"))
+    prefix = 'streaming' if is_streaming else 'browsing'
+    for i, chunk in enumerate(chunks):
+        chunk[['packet_times', 'packet_sizes']].to_csv(
+            os.path.join(outdir, f'{prefix}-{i}-{fname}')
+        )
 
     return True
 
-def etl(source, outdir, pattern):
+def etl(source, outdir, pattern, chunk_length, split_ips, dominating_threshold):
     """
     Loads data files from source matching a glob pattern, then performs cleaning
     and preprocessing steps and saves each file to outdir.
     """
-    # global out
-    # out = outdir
 
     # Make sure source exists. If not, then make soft links.
     if not os.path.exists(source):
@@ -89,9 +84,19 @@ def etl(source, outdir, pattern):
     # We're only interested in the vpn data
     to_preprocess = list(filter(lambda file: "novpn" not in file.lower(), to_preprocess))
 
-    args = zip(to_preprocess, [outdir]*len(to_preprocess))
-    with concurrent.futures.ProcessPoolExecutor(5) as executor:
-        results = executor.map(_process_file, args)
+    args = [
+        (file, outdir, chunk_length, split_ips, dominating_threshold)
+        for file in to_preprocess
+    ]
+
+    workers = multiprocessing.cpu_count()
+    print(f'Starting a processing pool of {workers} workers.')
+    pool = multiprocessing.Pool(processes=workers)
+    results = pool.map(_process_file, args)
+    # with concurrent.futures.ProcessPoolExecutor() as executor:
+    #     results = executor.map(_process_file, args)
     
-        print(list(results))
+    results = np.array(list(results))
+    print(f'{sum(results)} input files successfully preprocessed.')
+    print(f"{sum(~results)} files couldn't be procesed.")
     

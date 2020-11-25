@@ -10,6 +10,7 @@ import src
 def main(targets):
 
     config_dir = 'config'
+    run_all = False
 
     if 'all' in targets:
         run_all = True

@@ -16,6 +16,14 @@ def flowpic(df, bins=1500):
     c.packet_times = c.packet_times - c.packet_times.min()
     c.packet_times = c.packet_times / c.packet_times.max() * 1500
     
+    # /\/\/\/\/\/\/\
+    #! TODO: Extend FlowPic so that the histogram has a channel for direction.
+    #
+    # We can have a second channel act as the proportion of packets that are
+    # being downloaded. So a 1.0 would mean all packets were downloaded in that
+    # bin, and 0.0 would mean all packets in that bin were uploaded.
+    # \/\/\/\/\/\/\/
+
     h = np.histogram2d(c.packet_times, c.packet_sizes, bins=bins)[0]
     h = h / h.max()
 
