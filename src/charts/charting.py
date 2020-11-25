@@ -1,5 +1,69 @@
 import src.features
+import numpy as np
 import matplotlib.pyplot as plt
+
+def grow_around_index(indexes, growth, xmin=0, xmax=1499, ymin=0, ymax=1499):
+    """
+    Takes a sequence of indexes and returns a sequence including all indexes to
+    the left, right, up, down of those indexes.
+    """
+
+    grown = set()
+
+    for (x,y) in indexes:
+
+        minx = max(xmin, x-growth)
+        maxx = min(xmax, x+growth)
+        miny = max(ymin, y-growth)
+        maxy = min(ymax, y+growth)
+        
+        # See: https://stackoverflow.com/questions/11144513/cartesian-product-of-x-and-y-array-points-into-single-array-of-2d-points
+        kernel = np.transpose([
+            np.tile(range(minx, maxx+1), (maxy-miny+1)),
+            np.repeat(range(miny,maxy+1), (maxx-minx+1))
+        ])
+        
+        grown.update(map(tuple, kernel))
+
+    return np.array(list(grown))
+
+
+def flowpic(flowpic, exaggerate=True, pixel_growth=20, figsize=(10,10), **kwargs):
+    """
+    Takes in a FlowPic histogram output and chart it. Optionally `exaggerate`s
+    the chart by setting all non-zero values to have maximum luminance, and by
+    growing the size of each pixel to `pixel_growth` pixels.
+
+    **kwargs are passed to `plt.imshow`.
+    """
+
+    options = {'cmap': 'Greys', 'origin': 'lower', 'vmin': 0, 'vmax': 1}
+
+    fig, ax = plt.subplots(figsize=figsize)
+
+    if exaggerate:
+
+        ex = flowpic.copy()
+
+        grown_idx = grow_around_index(
+            np.argwhere(ex > 0), pixel_growth,
+            xmin=0, xmax=1499, ymin=0, ymax=1499
+        )
+
+        # To set values at specific indices on a numpy array, we need to specify
+        # row and column as two separate arrays
+        ex[grown_idx[:,0], grown_idx[:,1]] = 1
+
+        plt.imshow(ex.T > 0, **options)
+
+    else:
+        plt.imshow(flowpic.T, **options)
+
+    plt.xlabel('Normalized arrival time')
+    plt.ylabel('Packet size (bytes)')
+    plt.show()
+
+
 
 # def plot_rolling(df, column, seconds, stat='mean', ax=None, label=None):
 #     """
