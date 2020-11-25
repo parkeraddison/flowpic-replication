@@ -28,13 +28,13 @@ def grow_around_index(indexes, growth, xmin=0, xmax=1499, ymin=0, ymax=1499):
     return np.array(list(grown))
 
 
-def flowpic(flowpic, exaggerate=True, pixel_growth=20, figsize=(10,10), **kwargs):
+def flowpic(flowpic, exaggerate=True, pixel_growth=10, figsize=(10,10), **kwargs):
     """
     Takes in a FlowPic histogram output and chart it. Optionally `exaggerate`s
     the chart by setting all non-zero values to have maximum luminance, and by
     growing the size of each pixel to `pixel_growth` pixels.
 
-    **kwargs are passed to `plt.imshow`.
+    **kwargs are passed to `ax.imshow`.
     """
 
     options = {'cmap': 'Greys', 'origin': 'lower', 'vmin': 0, 'vmax': 1}
@@ -61,7 +61,9 @@ def flowpic(flowpic, exaggerate=True, pixel_growth=20, figsize=(10,10), **kwargs
 
     plt.xlabel('Normalized arrival time')
     plt.ylabel('Packet size (bytes)')
-    plt.show()
+    # plt.show()
+
+    return fig, ax
 
 
 

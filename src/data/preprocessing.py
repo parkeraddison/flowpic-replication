@@ -56,7 +56,7 @@ def dominating_flow(df, threshold=0.9):
     else:
         raise Warning("No dominating flow could be found for this data.")
 
-def split_directions(df):
+def split_on_direction(df):
     """
     Takes in a DataFrame indexed by (IP1, IP2, direction) and spits out two
     DataFrames, (uploaded_packets, downloaded_packets).
@@ -65,7 +65,7 @@ def split_directions(df):
     # network-stats, so the whole 'sending' vs 'receiving' may not be accurate.
 
     uploaded = df.loc[(slice(None), slice(None), 1)]
-    downloaded = df.loc[(slice(None), slice(None), 1)]
+    downloaded = df.loc[(slice(None), slice(None), 2)]
 
     return (uploaded, downloaded)
 
@@ -118,7 +118,7 @@ def preprocess(
         data = dominating_flow(data, dominating_threshold)
 
     if split_directions:
-        uploading, downloading = split_directions(data)
+        uploading, downloading = split_on_direction(data)
         up_chunks = chunk(uploading, chunk_length)
         down_chunks = chunk(downloading, chunk_length)
         return (up_chunks, down_chunks)
