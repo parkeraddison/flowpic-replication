@@ -2,8 +2,7 @@
     "source": "data/features/features.csv",
     "outdir": "data/out/",
     "outfile": "model.h5",
-    "classifier": "LSTM",
-    "parameters": {
-        
-    }
+    "batch_size": 10,
+    "epochs": 10,
+    "validation_size": 0.2
 }

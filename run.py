@@ -32,7 +32,7 @@ def main(targets):
         print('Data configuration loaded.')
         
         print('Running ETL pipeline.')
-        src.data.etl(**data_params)
+        src.data.pipeline(**data_params)
         print('ETL pipeline complete.')
 
     if 'features' in targets or run_all:
@@ -46,7 +46,7 @@ def main(targets):
         print('Features configuration loaded.')
 
         print('Engineering features.')
-        src.features.apply_features(**features_params)
+        src.features.pipeline(**features_params)
         print(f'Feature engineering complete.')
 
     if 'train' in targets or run_all:

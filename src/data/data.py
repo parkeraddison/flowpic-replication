@@ -7,6 +7,7 @@ import os
 import re
 
 import multiprocessing
+import time
 
 def _process_file(args):
     return process_file(*args)
@@ -57,7 +58,7 @@ def process_file(file, outdir, chunk_length, split_ips, dominating_threshold):
 
     return True
 
-def etl(source, outdir, pattern, chunk_length, split_ips, dominating_threshold):
+def pipeline(source, outdir, pattern, chunk_length, split_ips, dominating_threshold):
     """
     Loads data files from source matching a glob pattern, then performs cleaning
     and preprocessing steps and saves each file to outdir.
@@ -91,10 +92,10 @@ def etl(source, outdir, pattern, chunk_length, split_ips, dominating_threshold):
 
     workers = multiprocessing.cpu_count()
     print(f'Starting a processing pool of {workers} workers.')
+    start = time.time()
     pool = multiprocessing.Pool(processes=workers)
     results = pool.map(_process_file, args)
-    # with concurrent.futures.ProcessPoolExecutor() as executor:
-    #     results = executor.map(_process_file, args)
+    print(f'Time elapsed: {round(time.time() - start)} seconds.')
     
     results = np.array(list(results))
     print(f'{sum(results)} input files successfully preprocessed.')
