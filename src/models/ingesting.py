@@ -1,5 +1,6 @@
 import src
 
+import os
 import numpy as np
 import tensorflow as tf
 
@@ -42,4 +43,4 @@ def get_dataset(file_list, batch_size=10):
 
     steps_per_epoch = np.int(np.ceil(len(file_list) / batch_size))
 
-    return dataset, 
+    return dataset, steps_per_epoch

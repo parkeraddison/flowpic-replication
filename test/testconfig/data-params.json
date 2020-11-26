@@ -1,5 +1,8 @@
 {
     "source": "test/testdata",
     "outdir": "data/preprocessed",
-    "pattern": "*"
+    "pattern": "*",
+    "chunk_length": "2s",
+    "split_ips": false,
+    "dominating_threshold": 0.9
 }

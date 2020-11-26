@@ -2,6 +2,7 @@ import src
 from src.models.ingesting import get_dataset
 
 import os
+import glob
 
 import numpy as np
 
@@ -20,6 +21,7 @@ def train(source, outdir, outfile, batch_size, epochs, validation_size):
     # Get both streaming/*.npy and browsing/*.npy files, the label will be
     # parsed by the dataset generator.
     all_files = glob.glob(os.path.join(source, '*/*.npy'))
+    print(f'{len(all_files)} feature files found.')
     # Create shuffled train and validation sets
     train_files, val_files = train_test_split(all_files, test_size=validation_size)
 
@@ -77,10 +79,10 @@ def train(source, outdir, outfile, batch_size, epochs, validation_size):
         patience=3
     )
 
+    # Wondering "where is the batch size"? It's defined when we load our data!
     history = model.fit(
-        train, steps_per_epoch=train_steps
-        validation_data=valid, validation_steps=val_steps,
-        batch_size=batch_size,
+        train, steps_per_epoch=train_steps,
+        validation_data=val, validation_steps=val_steps,
         epochs=epochs,
         callbacks=[checkpoint_cb, early_stopping_cb]
     )

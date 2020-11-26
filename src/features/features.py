@@ -28,6 +28,7 @@ def engineer_file(file, outdir):
 def pipeline(source, outdir):
 
     preprocessed = glob.glob(os.path.join(source, "*"))
+    print(f'{len(preprocessed)} preprocessed files found.')
 
     # Make sure outdir exists with streaming and browsing directories
     os.makedirs(os.path.join(outdir, 'streaming'), exist_ok=True)
@@ -35,7 +36,7 @@ def pipeline(source, outdir):
 
     args = [
         (file, outdir)
-        for file in preprocessed[:5]
+        for file in preprocessed
     ]
 
     workers = multiprocessing.cpu_count()
