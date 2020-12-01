@@ -3,6 +3,6 @@
     "outdir": "data/preprocessed",
     "pattern": "*",
     "chunk_length": "2s",
-    "split_ips": false,
+    "isolate_flow": false,
     "dominating_threshold": 0.9
 }

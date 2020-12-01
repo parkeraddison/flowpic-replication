@@ -11,7 +11,7 @@ import time
 
 def _process_file(args):
     return process_file(*args)
-def process_file(file, outdir, chunk_length, split_ips, dominating_threshold):
+def process_file(file, outdir, chunk_length, isolate_flow, dominating_threshold):
 
     # print(f"Processing {file}")
     fname = os.path.basename(file)
@@ -20,12 +20,11 @@ def process_file(file, outdir, chunk_length, split_ips, dominating_threshold):
     # Load in the raw data
     df = pd.read_csv(file)
 
-    # Cleaning and preprocessing (reformatting) of the data are file- and
-    # config-agnostic.
     try:
         cleaned = src.data.clean(df)
-        chunks = src.data.preprocess(cleaned, chunk_length, split_ips, dominating_threshold)
+        chunks = src.data.preprocess(cleaned, chunk_length, isolate_flow, dominating_threshold)
     except Warning as warn:
+        # A warning may be raised by our preprocessing stage if we attempt to
         print(warn)
     # Extract labels from the file name and save as either a streaming or
     # browsing file.
@@ -86,7 +85,7 @@ def pipeline(source, outdir, pattern, chunk_length, isolate_flow, dominating_thr
     to_preprocess = list(filter(lambda file: "novpn" not in file.lower(), to_preprocess))
 
     args = [
-        (file, outdir, chunk_length, split_ips, dominating_threshold)
+        (file, outdir, chunk_length, isolate_flow, dominating_threshold)
         for file in to_preprocess
     ]
 
