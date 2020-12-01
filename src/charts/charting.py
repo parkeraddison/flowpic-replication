@@ -28,36 +28,32 @@ def grow_around_index(indexes, growth, xmin=0, xmax=1499, ymin=0, ymax=1499):
     return np.array(list(grown))
 
 
-def flowpic(flowpic, exaggerate=True, pixel_growth=10, figsize=(10,10), **kwargs):
+def flowpic(flowpic, figsize=(10,10), **kwargs):
     """
-    Takes in a FlowPic histogram output and chart it. Optionally `exaggerate`s
-    the chart by setting all non-zero values to have maximum luminance, and by
-    growing the size of each pixel to `pixel_growth` pixels.
+    Takes in a FlowPic histogram output and charts it for visual comprehension.
+    This means that the picture gets exaggerated by setting all non-zero values
+    to maximum luminance, and making each bin look larger than a single pixel!
 
-    **kwargs are passed to `ax.imshow`.
+    **kwargs are passed to plt.scatter
     """
+
+    hist, downprop = [e.squeeze() for e in np.dsplit(flowpic, 2)]
 
     options = {'cmap': 'Greys', 'origin': 'lower', 'vmin': 0, 'vmax': 1}
 
     fig, ax = plt.subplots(figsize=figsize)
 
-    if exaggerate:
-
-        ex = flowpic.copy()
-
-        grown_idx = grow_around_index(
-            np.argwhere(ex > 0), pixel_growth,
-            xmin=0, xmax=1499, ymin=0, ymax=1499
+    plt.scatter(
+        *np.argwhere(hist > 0).T,
+        # The color is based on the download proportion.
+        c=downprop[hist>0],
+        marker='s', s=40,
+        **kwargs
         )
-
-        # To set values at specific indices on a numpy array, we need to specify
-        # row and column as two separate arrays
-        ex[grown_idx[:,0], grown_idx[:,1]] = 1
-
-        plt.imshow(ex.T > 0, **options)
-
-    else:
-        plt.imshow(flowpic.T, **options)
+    colorbar = plt.colorbar(orientation='horizontal')
+    colorbar.set_label('Proportion downloaded')
+    plt.xlim(0, 1500)
+    plt.ylim(0, 1500)
 
     plt.xlabel('Normalized arrival time')
     plt.ylabel('Packet size (bytes)')

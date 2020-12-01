@@ -1,10 +1,11 @@
+# Functions to load in data in tensorflow.
 import src
 
 import os
 import numpy as np
 import tensorflow as tf
 
-def data_generator(file_list, batch_size):
+def data_generator(file_list, batch_size, dimensions_to_use):
     """
     
     See:
@@ -21,7 +22,8 @@ def data_generator(file_list, batch_size):
             data = []
             labels = []
             for file in file_chunk:
-                arr = np.load(file)
+                # Only take the first n dimensions based on the input shape
+                arr = np.load(file)[:,:,dimensions_to_use]
                 data.append(arr.reshape(src.INPUT_SHAPE))
                 labels.append(os.path.dirname(file).endswith(b'streaming'))
             data = np.asarray(data).reshape(-1,*src.INPUT_SHAPE)

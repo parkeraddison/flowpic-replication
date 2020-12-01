@@ -13,7 +13,7 @@ def _process_file(args):
     return process_file(*args)
 def process_file(file, outdir, chunk_length, split_ips, dominating_threshold):
 
-    print(f"Processing {file}")
+    # print(f"Processing {file}")
     fname = os.path.basename(file)
     fnlower = fname.lower()
 
@@ -58,7 +58,7 @@ def process_file(file, outdir, chunk_length, split_ips, dominating_threshold):
 
     return True
 
-def pipeline(source, outdir, pattern, chunk_length, split_ips, dominating_threshold):
+def pipeline(source, outdir, pattern, chunk_length, isolate_flow, dominating_threshold):
     """
     Loads data files from source matching a glob pattern, then performs cleaning
     and preprocessing steps and saves each file to outdir.

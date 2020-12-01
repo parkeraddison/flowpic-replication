@@ -92,16 +92,16 @@ def chunk(df, chunk_length='60s'):
     return chunks
 
 def preprocess(
-    df, chunk_length='60s', split_ips=False, dominating_threshold=0.9,
+    df, chunk_length='60s', isolate_flow=False, dominating_threshold=0.9,
     split_directions=False
     ):
     """
     Returns a list of DataFrames, each containing `chunk_length` worth of per-
     packet measurements.
     
-    If `split_ips` is True, then a main flow between a pair of IPs will try to
-    be found whose presense is greater than the `dominating_threshold`. In
-    absense of a main flow, a Warning will be raised.
+    If `isolate_flow` is True, then a main flow between a pair of IPs will be
+    found whose presense is greater than the `dominating_threshold`. In absense
+    of a main flow a Warning will be raised and the file will be ignored.
 
     If `split_directions` is True, then separate chunks will be returned for
     each packet direction in the data, so a tuple of lists will be returned,
@@ -114,7 +114,7 @@ def preprocess(
 
     data = indexed
 
-    if split_ips:
+    if isolate_flow:
         data = dominating_flow(data, dominating_threshold)
 
     if split_directions:

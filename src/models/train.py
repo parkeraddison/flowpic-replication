@@ -14,7 +14,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import models, layers
 
-def train(source, outdir, outfile, batch_size, epochs, validation_size):
+def train(source, outdir, outfile, batch_size, epochs, validation_size, dimensions_to_use):
 
     os.makedirs(outdir, exist_ok=True)
 
@@ -25,8 +25,10 @@ def train(source, outdir, outfile, batch_size, epochs, validation_size):
     # Create shuffled train and validation sets
     train_files, val_files = train_test_split(all_files, test_size=validation_size)
 
-    train, train_steps = get_dataset(train_files, batch_size)
-    val, val_steps = get_dataset(val_files, batch_size)
+    src.INPUT_SHAPE = (1500, 1500, len(dimensions_to_use))
+
+    train, train_steps = get_dataset(train_files, batch_size, dimensions_to_use)
+    val, val_steps = get_dataset(val_files, batch_size, dimensions_to_use)
 
     # Prefetch the data for a slight performance boost
     # See: https://www.tensorflow.org/guide/data_performance#prefetching
