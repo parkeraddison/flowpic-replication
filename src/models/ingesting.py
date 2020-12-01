@@ -22,7 +22,7 @@ def data_generator(file_list, batch_size, dimensions_to_use):
             data = []
             labels = []
             for file in file_chunk:
-                # Only take the first n dimensions based on the input shape
+                # Only take the desired dimensions
                 arr = np.load(file)[:,:,dimensions_to_use]
                 data.append(arr.reshape(src.INPUT_SHAPE))
                 labels.append(os.path.dirname(file).endswith(b'streaming'))
@@ -31,14 +31,14 @@ def data_generator(file_list, batch_size, dimensions_to_use):
             yield data, labels
             i = i + 1
 
-def get_dataset(file_list, batch_size=10):
+def get_dataset(file_list, batch_size, dimensions_to_use):
     """
     Takes a list of *.npy filepaths and returns a TensorFlow dataset built on
     a generator, and the steps required for a single epoch.
     """
     
     dataset = tf.data.Dataset.from_generator(
-        data_generator, args=(file_list, batch_size),
+        data_generator, args=(file_list, batch_size, dimensions_to_use),
         output_types=(tf.float32, tf.bool),
         output_shapes=((None, *src.INPUT_SHAPE), (None,))
     )

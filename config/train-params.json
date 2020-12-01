@@ -1,9 +1,9 @@
 {
     "source": "data/features/",
     "outdir": "data/out/",
-    "outfile": "model.h5",
-    "batch_size": 10,
-    "epochs": 10,
+    "outfile": "model-histonly.h5",
+    "batch_size": 32,
+    "epochs": 20,
     "validation_size": 0.2,
     "dimensions_to_use": [0]
 }

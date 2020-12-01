@@ -47,7 +47,7 @@ def main(targets):
 
         print('Engineering features.')
         src.features.pipeline(**features_params)
-        print(f'Feature engineering complete.')
+        print('Feature engineering complete.')
 
     if 'train' in targets or run_all:
         # Train a model on feature-engineered data and report its ROC AUC.
