@@ -1,0 +1,8 @@
+{
+    "source": "data/features/",
+    "outdir": "data/out/",
+    "outfile": "test.h5",
+    "batch_size": 1,
+    "epochs": 1,
+    "validation_size": 0.2
+}

@@ -1,5 +1,67 @@
 import src.features
+import numpy as np
 import matplotlib.pyplot as plt
+
+def grow_around_index(indexes, growth, xmin=0, xmax=1499, ymin=0, ymax=1499):
+    """
+    Takes a sequence of indexes and returns a sequence including all indexes to
+    the left, right, up, down of those indexes.
+    """
+
+    grown = set()
+
+    for (x,y) in indexes:
+
+        minx = max(xmin, x-growth)
+        maxx = min(xmax, x+growth)
+        miny = max(ymin, y-growth)
+        maxy = min(ymax, y+growth)
+        
+        # See: https://stackoverflow.com/questions/11144513/cartesian-product-of-x-and-y-array-points-into-single-array-of-2d-points
+        kernel = np.transpose([
+            np.tile(range(minx, maxx+1), (maxy-miny+1)),
+            np.repeat(range(miny,maxy+1), (maxx-minx+1))
+        ])
+        
+        grown.update(map(tuple, kernel))
+
+    return np.array(list(grown))
+
+
+def flowpic(flowpic, figsize=(10,10), **kwargs):
+    """
+    Takes in a FlowPic histogram output and charts it for visual comprehension.
+    This means that the picture gets exaggerated by setting all non-zero values
+    to maximum luminance, and making each bin look larger than a single pixel!
+
+    **kwargs are passed to plt.scatter
+    """
+
+    hist, downprop = [e.squeeze() for e in np.dsplit(flowpic, 2)]
+
+    options = {'cmap': 'Greys', 'origin': 'lower', 'vmin': 0, 'vmax': 1}
+
+    fig, ax = plt.subplots(figsize=figsize)
+
+    plt.scatter(
+        *np.argwhere(hist > 0).T,
+        # The color is based on the download proportion.
+        c=downprop[hist>0],
+        marker='s', s=40,
+        **kwargs
+        )
+    colorbar = plt.colorbar(orientation='horizontal')
+    colorbar.set_label('Proportion downloaded')
+    plt.xlim(0, 1500)
+    plt.ylim(0, 1500)
+
+    plt.xlabel('Normalized arrival time')
+    plt.ylabel('Packet size (bytes)')
+    # plt.show()
+
+    return fig, ax
+
+
 
 # def plot_rolling(df, column, seconds, stat='mean', ax=None, label=None):
 #     """

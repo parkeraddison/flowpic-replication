@@ -1,8 +1,8 @@
 {
-    "source": "data/raw",
+    "source": "test/testdata",
     "outdir": "data/preprocessed",
     "pattern": "*",
-    "chunk_length": "60s",
+    "chunk_length": "2s",
     "isolate_flow": false,
     "dominating_threshold": 0.9
 }

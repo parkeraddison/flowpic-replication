@@ -1,10 +1,9 @@
 {
-    "source": "data/features/features_peaks.csv",
-    "classifier": "RandomForest",
-    "parameters": {
-        "RandomForest": {
-            "n_estimators": 50,
-            "max_depth": 100
-        }
-    }
+    "source": "data/features/",
+    "outdir": "data/out/",
+    "outfile": "model-histonly.h5",
+    "batch_size": 32,
+    "epochs": 20,
+    "validation_size": 0.2,
+    "dimensions_to_use": [0]
 }

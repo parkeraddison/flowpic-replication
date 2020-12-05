@@ -2,42 +2,44 @@
 
 - [Purpose](#purpose)
 - [Running](#running)
-  - [Target `collect`](#target-collect)
+  - [~~Target `collect`~~](#target-collect)
   - [Target `data`](#target-data)
   - [Target `features`](#target-features)
   - [Target `train`](#target-train)
   - [Example](#example)
-- [Responsibilities](#responsibilities)
 
 ## TODO
 
-- [ ] Better features
-  - [ ] Signal processing would be great, but quickly maybe just more summary stats
-- [ ] Chunk the feature data into bins/windows
-- [ ] Address class imbalance (collect more browsing data!)
+- [x] Add packet direction as secondary channel to FlowPic
+- [ ] Add `predict` target to take in a network-stats output and use a trained model to classify whether or not it contains video streaming
+- [ ] Adjust the test data and `test` target now that FlowPic is being used -- mainly need to adjust the test config
 
 ## Purpose
 
-Our goal is to predict whether a user is streaming video on a VPN by analyzing their network traffic traits such as video signatures, interpacket intervals, packet size, etc. through a machine learning classifier, then repeat the analysis with other noise present on the network. 
+Our goal is to predict whether or not network traffic which utilizes a VPN contains video streaming activity.
 
-Our data collection process uses the network-stats script from Viasat, which will output packet data on a per-second, per-connection basis from any given network interface. This tool was designed to focus more on connection-to-connection data rather than individual packet data. Once running, network-stats will output the time, source, destination, and protocol of the packets sent within any connection, as well as the count, size, time, and direction of each packet’s arrival at the destination. 
+## FlowPic
 
+This particular approach is an implementation and slight modification of the FlowPic model introduced in [FlowPic: Encrypted Internet Traffic Classification is as Easy as Image Recognition](https://ieeexplore.ieee.org/document/8845315) by Tal Shapira and Yuval Shavitt.
+
+The basic premise: a short duration of network traffic is turned into a 2D histogram of Packet Size and Arrival Time. This histogram can be treated similar to an image -- a two-dimensional array with a value channel (in our case, bin density density remapped to range from 0 to 1).
+
+The model has also been extended witha  second channel containing the proportion of packets in each bin that were downloaded.
 
 ## Running
 
-The following targets can be run by calling `python run.py <target_name>`. These targets perform various aspects of the data collection, cleaning, engineering, and training pipeline.
+The following targets can be run by calling `python run.py <target_name>`. These targets perform various aspects of the data collection, cleaning, engineering, training, and predicting pipeline.
 
 In DSMLP, first run `launch-180.sh -i parkeraddison/capstone-dev -G B05_VPN_XRAY`, then inside of the container nagivate to `cd /home/jovyan/data-science-capstone`.
 
-### Target `collect`
-**WIP**
+### ~~Target `collect`~~
+**WIP - Hasn't been tested yet**
 
 Uses [`network-stats`](https://github.com/Viasat/network-stats) to collect your local machine's network activity for use in training. Labels must be provided.
 
 To stop data capturing, press `CTRL-C` in the terminal.
 
 ### Target `data`
-**WIP**
 
 Loads data from a source directory then performs cleaning and preprocessing steps on each file. Saves the preprocessed data to a intermediate directory.
 
@@ -47,57 +49,48 @@ See `config/data-params.json` for configuration:
 | source | Path to directory containing raw data. Default: `data/raw/` |
 | outdir | Path to store preprocessed data. Default: `data/preprocessed/` |
 | pattern | Glob pattern. Only copy and preprocess data matching this pattern. Default: `null` |
+| chunk_length | Time offset string. To augment the data and allow the classifier to work on short durations of data, every file is split into multiple non-overlapping files of this length. Default: `60s` |
+| isolate_flow | Boolean. If true, each file will be filtered so that only the most frequent pair of IPs will remain, if possible. Default: `false` |
+| dominating_threshold | Proportion. If isolate_flow is true and no pair of IPs has more than this proportion of communications in the file, then the file will be ignored as no dominant traffic flow could be found. Default: `0.9`.
 
 ### Target `features`
-**WIP**
 
-Loads all preprocessed data and summarizes each file into sets of features and labels, each set containing a configurable number of seconds of data. Saves a table of all features and labels to a file to be used for model training.
+Loads all preprocessed data and computes a FlowPic for each, then saves each FlowPic to a streaming/ or browsing/ directory depending on the file's label.
 
 See `config/features-params.json` for configuration:
 | Key | Description |
 | --- | --- |
 | source | Path to directory containing preprocessed data. Default: `data/preprocessed/` |
 | outdir | Path to directory to store feature engineered data. Default: `data/features/` |
-| outfile | File name to store feature engineered data. Must be a csv. Default: `features.csv` |
-| chunk_length | Time in seconds to chunk data into when computing features. Default: `60` |
 
 ### Target `train`
 
-Trains a model on feature-engineered data and prints out its area under the ROC curve.
+Trains a CNN model on FlowPics and saves the model.
 
 See `config/train-params.json` for configuration:
 | Key | Description |
 | --- | --- |
-| source | File path to csv containing feature engineered data. Default: `data/features/features.csv` |
-| classifier | Name of the type of classifier to use. One of {RandomForest}. Default: `RandomForest` |
-| parameters | Classifier-specific hyperparameters. See sklearn documentation.
+| source | Path to directory containing feature engineered data (this folder should contain a streaming/ and browsing/ directory. Default: `data/features/` |
+| outdir | Path to directory to save trained model. Default: `data/out/` |
+| batch_size | Batch size to use when training the model. Default: `10` |
+| epochs | Number of iterations over the training data that the model should undergo. Regardless of additional epochs, the saved model will be from the iteration with the lowest validation loss and training will stop after 3 iterations without any improvement to the lowest validation loss. Default: `20` |
+| validation_size | Proportion. This amount of training data will be withheld as a validation set. Default: `0.2` |
+| dimensions_to_use | List of channel indices [Histogram→0, Proportion downloaded→1] to use as part of the model. Default: `[0]`
 
 ### Example
 
 ```bash
 ssh dsmlp
 
-launch-180.sh -i parkeraddison/capstone-dev -P Always -G B05_VPN_XRAY
+# Request container with proper image and group, and two GPUs.
+launch-180.sh -i parkeraddison/capstone-dev -G B05_VPN_XRAY -g 2
 
+# Navigate to the cloned repository
 cd /home/jovyan/data-science-capstone
 
-# Will take a few minutes to preprocess the data -- haven't parallelized yet!
+# Check out the proper branch
+git checkout flowpic
+
+# Run the preprocessing, feature engineering, and training.
 python run.py data features train
 ```
-Output:
-```plaintext
-[...]
-Writing features to data/features/features.csv
-Feature engineering complete.
-Train target recognized.
-Train configuration loaded.
-Training model.
-ROC AUC: 0.8333333333333334
-Model training complete.
-```
-
-## Responsibilities
-
-* Group member 1 (Jerry) Initial work on introduction. Wrote run.py, set up data generation environment through network-stats and configured data-generation-params to be used with run.py. Work on methods report.
-* Group member 2 (Parker) Initial work on data generation environment. Wrote introduction. Edit methods report. Create preprocessing and feature piplines, targets.
-
